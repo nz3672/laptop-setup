@@ -121,48 +121,25 @@ fancy_echo "Updating Homebrew formulae ..."
 brew update --force # https://github.com/Homebrew/brew/issues/1151
 brew bundle --file=- <<EOF
 tap "thoughtbot/formulae"
-tap "heroku/brew"
 
 # Unix
-brew "universal-ctags"
 brew "fzf"
 brew "git"
 brew "openssl"
-brew "rcm"
-brew "reattach-to-user-namespace"
-brew "the_silver_searcher"
 brew "tmux"
 brew "vim"
-brew "watchman"
+brew "zoxide"
 brew "zsh"
-
-# Heroku
-brew "heroku/brew/heroku"
-brew "parity"
+brew "starship"
 
 # GitHub
 brew "gh"
 
-# Image manipulation
-brew "imagemagick"
-
-# PDF Rendering
-brew "poppler"
-
-# Programming language prerequisites and package managers
-brew "libyaml" # should come after openssl
-brew "coreutils"
 brew "yarn"
-cask "gpg-suite-no-mail"
 
-# Databases
-brew "postgresql@14", restart_service: :changed
-brew "redis", restart_service: :changed
+brew "docker"
+brew "kitty"
 EOF
-
-fancy_echo "Update heroku binary ..."
-brew unlink heroku
-brew link --force heroku
 
 fancy_echo "Configuring asdf version manager ..."
 if [ ! -d "$HOME/.asdf" ]; then
@@ -188,26 +165,6 @@ add_or_update_asdf_plugin() {
 . "$(brew --prefix asdf)/libexec/asdf.sh"
 add_or_update_asdf_plugin "ruby" "https://github.com/asdf-vm/asdf-ruby.git"
 add_or_update_asdf_plugin "nodejs" "https://github.com/asdf-vm/asdf-nodejs.git"
-
-install_asdf_language() {
-  local language="$1"
-  local version
-  version="$(asdf list all "$language" | grep -v "[a-z]" | tr -s '\n' | tail -1)"
-
-  if ! asdf list "$language" | grep -Fq "$version"; then
-    asdf install "$language" "$version"
-    asdf set --home "$language" "$version"
-  fi
-}
-
-fancy_echo "Installing latest Ruby ..."
-install_asdf_language "ruby"
-gem update --system
-number_of_cores=$(sysctl -n hw.ncpu)
-bundle config --global jobs $((number_of_cores - 1))
-
-fancy_echo "Installing latest Node ..."
-install_asdf_language "nodejs"
 
 if [ -f "$HOME/.laptop.local" ]; then
   fancy_echo "Running your customizations from ~/.laptop.local ..."
